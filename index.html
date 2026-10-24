@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polaris — Equity Research</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #02040a;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #93c5fd;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      user-select: none;
+    }
+
+    #sky {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 75% 70% at 50% 42%,
+        transparent 40%,
+        rgba(2, 4, 10, 0.55) 100%
+      );
+    }
+
+    .planet {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 28vh;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 150% 110% at 50% 100%,
+          #080d18 0%,
+          #050810 55%,
+          transparent 82%);
+    }
+
+    .planet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 35% at 50% 100%, rgba(59, 130, 246, 0.04), transparent 70%);
+    }
+
+    .brand-logo {
+      position: fixed;
+      top: 7.5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 8;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      opacity: 0.88;
+      filter: drop-shadow(0 0 18px rgba(147, 197, 253, 0.35));
+      pointer-events: none;
+    }
+
+    .socials {
+      position: fixed;
+      bottom: 4.2vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 1.15rem;
+      align-items: center;
+    }
+
+    .social {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      opacity: 0.7;
+    }
+
+    .social:hover {
+      background: rgba(59, 130, 246, 0.14);
+      border-color: rgba(147, 197, 253, 0.35);
+      transform: translateY(-3px);
+      opacity: 1;
+    }
+
+    .social img { width: 16px; height: 16px; object-fit: contain; }
+    .social svg { width: 14px; height: 14px; fill: #cbd5e1; }
+
+    .radial-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .radial-item {
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: scale(0.9);
+      pointer-events: none;
+    }
+
+    .radial-item.visible {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .radial-item a,
+    .radial-item .label {
+      color: rgba(226, 232, 240, 0.9);
+      text-decoration: none;
+      font-size: 0.74rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      transition: color 0.25s, background 0.25s;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .radial-item a:hover,
+    .radial-item .label:hover {
+      color: #fff;
+      background: rgba(147, 197, 253, 0.1);
+    }
+
+    /* Sub-items slightly smaller */
+    .radial-item.sub a {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: rgba(226, 232, 240, 0.82);
+    }
+
+    .polaris-hit {
+      position: fixed;
+      z-index: 12;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+    }
+
+    @media (max-width: 700px) {
+      .brand-logo { width: 56px; height: 56px; top: 6vh; }
+      .socials { gap: 0.9rem; bottom: 3.5vh; }
+      .social { width: 34px; height: 34px; }
+      .radial-item a,
+      .radial-item .label { font-size: 0.68rem; letter-spacing: 0.09em; }
+      .radial-item.sub a { font-size: 0.62rem; }
+      .polaris-hit { width: 56px; height: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="sky"></canvas>
+  <div class="planet"></div>
+  <div class="vignette"></div>
+
+  <img src="assets/logo.png" alt="Polaris" class="brand-logo">
+
+  <div class="radial-menu" id="radialMenu">
+    <!-- Level 1 -->
+    <div class="radial-item" id="item-earnings">
+      <span class="label">Earnings Updates</span>
+    </div>
+    <div class="radial-item" id="item-reports">
+      <a href="https://polarismmxxii.github.io/ResearchUpdates/" target="_blank" rel="noopener">Research Reports</a>
+    </div>
+
+    <!-- Level 2 – under Earnings -->
+    <div class="radial-item sub" id="item-6m26">
+      <a href="https://polarismmxxii.github.io/EarningsTerminal/" target="_blank" rel="noopener">6M26</a>
+    </div>
+    <div class="radial-item sub" id="item-9m26">
+      <a href="https://polarismmxxii.github.io/EarningsTerminal/9M26/" target="_blank" rel="noopener">9M26</a>
+    </div>
+  </div>
+
+  <div class="polaris-hit" id="polarisHit"></div>
+
+  <div class="socials">
+    <a href="https://stockbit.com/efuture?source=8" class="social" target="_blank" rel="noopener" title="Stockbit">
+      <img src="assets/stockbit.png" alt="Stockbit">
+    </a>
+    <a href="https://x.com/PolarisMMXXII" class="social" target="_blank" rel="noopener" title="X">
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.792l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+    </a>
+    <a href="https://youtube.com/@polarismmxxii" class="social" target="_blank" rel="noopener" title="YouTube">
+      <img src="assets/youtube.png" alt="YouTube">
+    </a>
+    <a href="https://instagram.com/polarismmxxii" class="social" target="_blank" rel="noopener" title="Instagram">
+      <img src="assets/instagram.png" alt="Instagram">
+    </a>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('sky');
+    const ctx = canvas.getContext('2d');
+    let width, height, stars = [];
+    let polarisPos = { x: 0, y: 0 };
+    let isHovering = false;
+    let menuProgress = 0;
+    let subProgress = 0;
+    let subOpen = false;
+    let constellationStars = [];
+
+    const constellationLayout = [
+      { dx: 0,   dy: 0 },
+      { dx: 78,  dy: 98 },
+      { dx: 150, dy: 190 },
+      { dx: 255, dy: 218 },
+      { dx: 350, dy: 168 },
+      { dx: 395, dy: 258 },
+      { dx: 295, dy: 308 },
+    ];
+
+    const connections = [
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 3]
+    ];
+
+    // Level 1
+    const menuItems = [
+      { id: 'item-earnings', angle: 210, distance: 155 },
+      { id: 'item-reports',  angle: 32,  distance: 165 }
+    ];
+
+    // Level 2 – branch FROM the Earnings label (local angles relative to earnings)
+    // angle: degrees from earnings position; distance: pixels from earnings
+    const subItems = [
+      { id: 'item-6m26', angle: 200, distance: 85 },  // lower-left of Earnings
+      { id: 'item-9m26', angle: 250, distance: 85 }   // upper-left of Earnings
+    ];
+    let earningsPos = { x: 0, y: 0 };
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+
+      const baseX = width * 0.34;
+      const baseY = height * 0.25;
+      const scale = Math.min(width / 740, height / 600) * 1.02;
+
+      constellationStars = constellationLayout.map((p, i) => ({
+        x: baseX + p.dx * scale,
+        y: baseY + p.dy * scale,
+        isPolaris: i === 0,
+        r: i === 0 ? 6.8 : 2.7,
+        baseAlpha: i === 0 ? 1 : 0.86,
+        twinkleSpeed: i === 0 ? 0.9 : (0.9 + Math.random() * 1.4),
+        phase: Math.random() * Math.PI * 2,
+        twinkleAmp: i === 0 ? 0.0 : (0.38 + Math.random() * 0.28)
+      }));
+
+      polarisPos = {
+        x: constellationStars[0].x,
+        y: constellationStars[0].y
+      };
+
+      const hit = document.getElementById('polarisHit');
+      hit.style.left = polarisPos.x + 'px';
+      hit.style.top  = polarisPos.y + 'px';
+
+      positionRadialLabels();
+      initBackgroundStars();
+    }
+
+    function positionRadialLabels() {
+      const scaleFactor = Math.min(width, height) / 920;
+
+      menuItems.forEach(item => {
+        const el = document.getElementById(item.id);
+        const rad = (item.angle * Math.PI) / 180;
+        const dist = item.distance * scaleFactor;
+        const x = polarisPos.x + Math.cos(rad) * dist;
+        const y = polarisPos.y + Math.sin(rad) * dist;
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+        el.style.transform = 'translate(-50%, -50%)';
+
+        // Remember Earnings position for sub-branches
+        if (item.id === 'item-earnings') {
+          earningsPos = { x, y };
+        }
+      });
+
+      // Sub-items branch from Earnings label, not from Polaris
+      subItems.forEach(item => {
+        const el = document.getElementById(item.id);
+        const rad = (item.angle * Math.PI) / 180;
+        const dist = item.distance * scaleFactor;
+        const x = earningsPos.x + Math.cos(rad) * dist;
+        const y = earningsPos.y + Math.sin(rad) * dist;
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
+        el.style.transform = 'translate(-50%, -50%)';
+      });
+    }
+
+    function initBackgroundStars() {
+      stars = [];
+      const count = Math.floor((width * height) / 3000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height * 0.74,
+          r: Math.random() * 1.25 + 0.25,
+          baseAlpha: Math.random() * 0.42 + 0.18,
+          twinkleSpeed: 0.25 + Math.random() * 0.55,
+          phase: Math.random() * Math.PI * 2,
+          twinkleAmp: 0.25 + Math.random() * 0.3
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      const grd = ctx.createLinearGradient(0, 0, 0, height * 0.7);
+      grd.addColorStop(0, 'rgba(4, 8, 18, 0.92)');
+      grd.addColorStop(0.6, 'rgba(3, 6, 14, 0.4)');
+      grd.addColorStop(1, 'rgba(2, 4, 10, 0)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, width, height * 0.7);
+
+      const t = performance.now() / 1000;
+
+      stars.forEach(s => {
+        const alpha = s.baseAlpha + Math.sin(t * s.twinkleSpeed + s.phase) * (s.twinkleAmp || 0.2);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 220, 255, ${Math.max(0.08, alpha)})`;
+        ctx.fill();
+      });
+
+      // Constellation lines
+      ctx.strokeStyle = isHovering
+        ? 'rgba(147, 197, 253, 0.32)'
+        : 'rgba(147, 197, 253, 0.16)';
+      ctx.lineWidth = 1.25;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      connections.forEach(([a, b]) => {
+        const s1 = constellationStars[a];
+        const s2 = constellationStars[b];
+        ctx.moveTo(s1.x, s1.y);
+        ctx.lineTo(s2.x, s2.y);
+      });
+      ctx.stroke();
+
+      const scaleFactor = Math.min(width, height) / 920;
+
+      // Level 1 radial lines
+      if (menuProgress > 0) {
+        menuItems.forEach(item => {
+          const rad = (item.angle * Math.PI) / 180;
+          const fullDist = item.distance * scaleFactor;
+          const currentDist = fullDist * Math.min(1, menuProgress * 1.35);
+          const endX = polarisPos.x + Math.cos(rad) * currentDist;
+          const endY = polarisPos.y + Math.sin(rad) * currentDist;
+
+          ctx.beginPath();
+          ctx.moveTo(polarisPos.x, polarisPos.y);
+          ctx.lineTo(endX, endY);
+          ctx.strokeStyle = `rgba(147, 197, 253, ${0.5 * Math.min(1, menuProgress * 1.5)})`;
+          ctx.lineWidth = 1.25;
+          ctx.stroke();
+        });
+      }
+
+      // Level 2 sub-lines — originate from Earnings label, not Polaris
+      if (subProgress > 0) {
+        subItems.forEach(item => {
+          const rad = (item.angle * Math.PI) / 180;
+          const fullDist = item.distance * scaleFactor;
+          const currentDist = fullDist * Math.min(1, subProgress * 1.35);
+          const endX = earningsPos.x + Math.cos(rad) * currentDist;
+          const endY = earningsPos.y + Math.sin(rad) * currentDist;
+
+          ctx.beginPath();
+          ctx.moveTo(earningsPos.x, earningsPos.y);
+          ctx.lineTo(endX, endY);
+          ctx.strokeStyle = `rgba(147, 197, 253, ${0.48 * Math.min(1, subProgress * 1.5)})`;
+          ctx.lineWidth = 1.15;
+          ctx.stroke();
+        });
+      }
+
+      // Stars
+      constellationStars.forEach(s => {
+        const isPol = s.isPolaris;
+        const alpha = s.baseAlpha + Math.sin(t * s.twinkleSpeed + s.phase) * (s.twinkleAmp || 0.2);
+
+        if (isPol) {
+          const pulse = 0.62 + 0.38 * Math.sin(t * 0.9);
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, isHovering ? 42 : 28 + 6 * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(147, 197, 253, ${0.09 * pulse})`;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, isHovering ? 26 : 18 + 3 * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(147, 197, 253, ${0.22 * pulse})`;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, isHovering ? 14 : 11, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(191, 219, 254, ${0.35 + 0.25 * pulse})`;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, isHovering ? 15.5 : 12.5, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${0.25 + 0.35 * pulse})`;
+          ctx.lineWidth = 1.1;
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r * 3.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(147, 197, 253, ${alpha * 0.1})`;
+          ctx.fill();
+        }
+
+        const coreR = isPol
+          ? (isHovering ? 6.2 : 5.4)
+          : s.r * (0.85 + 0.35 * (alpha / (s.baseAlpha + 0.01)));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, coreR, 0, Math.PI * 2);
+        ctx.fillStyle = isPol
+          ? `rgba(255, 255, 255, ${isHovering ? 1 : 0.97})`
+          : `rgba(226, 236, 255, ${Math.max(0.45, alpha)})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    // —— Menu logic ——
+    function showMenu() {
+      isHovering = true;
+      const start = performance.now();
+      const duration = 620;
+
+      function step(now) {
+        const p = Math.min(1, (now - start) / duration);
+        menuProgress = p;
+        if (p > 0.5) {
+          document.getElementById('item-earnings').classList.add('visible');
+          document.getElementById('item-reports').classList.add('visible');
+        }
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function hideMenu() {
+      isHovering = false;
+      menuProgress = 0;
+      subProgress = 0;
+      subOpen = false;
+      document.getElementById('item-earnings').classList.remove('visible');
+      document.getElementById('item-reports').classList.remove('visible');
+      document.getElementById('item-6m26').classList.remove('visible');
+      document.getElementById('item-9m26').classList.remove('visible');
+    }
+
+    function showSubMenu() {
+      if (subOpen) return;
+      subOpen = true;
+      const start = performance.now();
+      const duration = 480;
+
+      function step(now) {
+        const p = Math.min(1, (now - start) / duration);
+        subProgress = p;
+        if (p > 0.45) {
+          document.getElementById('item-6m26').classList.add('visible');
+          document.getElementById('item-9m26').classList.add('visible');
+        }
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function hideSubMenu() {
+      subOpen = false;
+      subProgress = 0;
+      document.getElementById('item-6m26').classList.remove('visible');
+      document.getElementById('item-9m26').classList.remove('visible');
+    }
+
+    function isOverAnyMenu() {
+      return !!document.querySelector('.radial-item.visible:hover') ||
+             document.getElementById('polarisHit').matches(':hover');
+    }
+
+    const polarisHit = document.getElementById('polarisHit');
+    const earningsEl = document.getElementById('item-earnings');
+
+    polarisHit.addEventListener('mouseenter', showMenu);
+    polarisHit.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!isOverAnyMenu()) hideMenu();
+      }, 160);
+    });
+
+    // Hover Earnings → open sub-branch
+    earningsEl.addEventListener('mouseenter', () => {
+      isHovering = true;
+      showSubMenu();
+    });
+
+    // Keep menu open while over any item
+    document.querySelectorAll('.radial-item').forEach(el => {
+      el.addEventListener('mouseenter', () => { isHovering = true; });
+      el.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+          if (!isOverAnyMenu()) {
+            hideMenu();
+          } else if (!document.getElementById('item-earnings').matches(':hover') &&
+                     !document.getElementById('item-6m26').matches(':hover') &&
+                     !document.getElementById('item-9m26').matches(':hover')) {
+            // Left the earnings branch entirely
+            hideSubMenu();
+          }
+        }, 140);
+      });
+    });
+
+    window.addEventListener('resize', () => {
+      resize();
+      positionRadialLabels();
+    });
+
+    resize();
+    draw();
+  </script>
+</body>
+</html>
